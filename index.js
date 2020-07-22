@@ -1,6 +1,10 @@
 const express = require("express");
-let dataPlayers = require("./data/headtohead.json");
-playersArr = dataPlayers.players;
+const fetch = require("node-fetch");
+
+var playersArr = [];
+
+let url = "https://alivebyacadomia.github.io/headtohead.json";
+let settings = { method: "Get" };
 
 function getSortOrder(prop) {
   return function (a, b) {
@@ -21,6 +25,20 @@ function filterById(jsonObject, id) {
 
 let app = express();
 let port = 8080;
+
+app.use(function (req, res, next) {
+  console.log("Fetch");
+
+  fetch(url, settings)
+    .then((res) => res.json())
+    .then((json) => {
+      playersArr = json.players;
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+  next();
+});
 
 app.get("/", (req, res) => {
   res.send([...playersArr].sort(getSortOrder("id")));
